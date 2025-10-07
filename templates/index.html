@@ -1,0 +1,35 @@
+<!doctype html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <title>Flask Calculator</title>
+  <style>
+    body { font-family: system-ui, Arial, sans-serif; margin: 2rem; }
+    form { display: grid; gap: .75rem; max-width: 320px; }
+    input, select, button { padding: .5rem; font-size: 1rem; }
+    .result { margin-top: 1rem; font-weight: 600; }
+    .error { margin-top: 1rem; color: #b00; }
+  </style>
+</head>
+<body>
+  <h1>Flask Calculator</h1>
+  <form method="POST">
+    <input name="a" placeholder="Number A" value="{{ a }}">
+    <input name="b" placeholder="Number B" value="{{ b }}">
+    <select name="op">
+      <option value="add" {% if op=='add' %}selected{% endif %}>Add</option>
+      <option value="sub" {% if op=='sub' %}selected{% endif %}>Subtract</option>
+      <option value="mul" {% if op=='mul' %}selected{% endif %}>Multiply</option>
+      <option value="div" {% if op=='div' %}selected{% endif %}>Divide</option>
+    </select>
+    <button type="submit">Calculate</button>
+  </form>
+
+  {% if result is not none %}
+  <div class="result">Result: {{ result }}</div>
+  {% endif %}
+  {% if error %}
+  <div class="error">Error: {{ error }}</div>
+  {% endif %}
+</body>
+</html>
