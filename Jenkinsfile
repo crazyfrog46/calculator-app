@@ -2,7 +2,8 @@ pipeline {
   agent any
 
   environment {
-    APP_SSH      = "app@${APP_HOST ?: 'REPLACE_WITH_APP_PUBLIC_DNS'}"
+    APP_HOST     = 'ec2-18-204-56-101.compute-1.amazonaws.com'
+    APP_SSH      = "app@${APP_HOST}"
     APP_DIR      = "/opt/calculator-app"
     VENV_DIR     = "${APP_DIR}/venv"
     SSH_CRED     = "app-ssh-key"
