@@ -36,6 +36,129 @@
       pointer-events: none;
     }
 
+    .dragon {
+      position: absolute;
+      font-size: 3rem;
+      animation: flyDragon 20s linear infinite;
+      z-index: 1;
+      filter: drop-shadow(0 0 10px rgba(255, 100, 0, 0.5));
+    }
+
+    .dragon1 {
+      top: 10%;
+      animation-delay: 0s;
+    }
+
+    .dragon2 {
+      top: 60%;
+      animation-delay: 7s;
+      animation-duration: 25s;
+    }
+
+    .dragon3 {
+      top: 35%;
+      animation-delay: 14s;
+      animation-duration: 22s;
+    }
+
+    @keyframes flyDragon {
+      0% {
+        left: -10%;
+        transform: rotate(-15deg);
+      }
+      50% {
+        transform: rotate(-10deg) translateY(-20px);
+      }
+      100% {
+        left: 110%;
+        transform: rotate(-15deg);
+      }
+    }
+
+    .fire {
+      position: absolute;
+      width: 60px;
+      height: 30px;
+      font-size: 2rem;
+      animation: breathFire 3s ease-in-out infinite;
+      pointer-events: none;
+    }
+
+    @keyframes breathFire {
+      0%, 100% {
+        opacity: 0;
+        transform: translateX(0) scale(0.5);
+      }
+      20% {
+        opacity: 1;
+        transform: translateX(30px) scale(1);
+      }
+      40% {
+        opacity: 0.8;
+        transform: translateX(60px) scale(1.2);
+      }
+      60% {
+        opacity: 0.4;
+        transform: translateX(90px) scale(0.8);
+      }
+      80% {
+        opacity: 0;
+        transform: translateX(120px) scale(0.5);
+      }
+    }
+
+    .flag {
+      position: absolute;
+      width: 80px;
+      height: 120px;
+      border: 2px solid #8b7355;
+      border-radius: 4px;
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.5);
+      animation: flagWave 3s ease-in-out infinite;
+      z-index: 2;
+    }
+
+    .flag-targaryen {
+      top: 5%;
+      left: 5%;
+      background: linear-gradient(145deg, #1a0000 0%, #330000 100%);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      color: #d4af37;
+      font-size: 2.5rem;
+    }
+
+    .flag-stark {
+      top: 5%;
+      right: 5%;
+      background: linear-gradient(145deg, #1a1a1a 0%, #333333 100%);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      color: #cccccc;
+      font-size: 2rem;
+    }
+
+    .flag-text {
+      font-size: 0.5rem;
+      margin-top: 0.25rem;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      font-weight: bold;
+    }
+
+    @keyframes flagWave {
+      0%, 100% {
+        transform: rotate(-2deg);
+      }
+      50% {
+        transform: rotate(2deg);
+      }
+    }
+
     .calculator {
       background: linear-gradient(145deg, #2c2c3e 0%, #1e1e2f 100%);
       border: 3px solid #8b7355;
@@ -49,6 +172,7 @@
       max-width: 420px;
       animation: forgeIn 0.6s ease-out;
       position: relative;
+      z-index: 3;
     }
 
     .calculator::before {
@@ -289,6 +413,26 @@
       text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.7);
     }
 
+    @media (max-width: 768px) {
+      .flag {
+        width: 60px;
+        height: 90px;
+        font-size: 1.5rem;
+      }
+      
+      .flag-stark {
+        font-size: 1.5rem;
+      }
+      
+      .flag-text {
+        font-size: 0.4rem;
+      }
+      
+      .dragon {
+        font-size: 2rem;
+      }
+    }
+
     @media (max-width: 480px) {
       .calculator {
         padding: 1.5rem;
@@ -302,10 +446,41 @@
       .result {
         font-size: 1.75rem;
       }
+      
+      .flag {
+        width: 50px;
+        height: 75px;
+        font-size: 1.2rem;
+      }
+      
+      .flag-stark {
+        font-size: 1.2rem;
+      }
+      
+      .flag-text {
+        font-size: 0.35rem;
+      }
     }
   </style>
 </head>
 <body>
+  <!-- Targaryen Flag -->
+  <div class="flag flag-targaryen">
+    <div>🐉</div>
+    <div class="flag-text">Targaryen</div>
+  </div>
+
+  <!-- Stark Flag -->
+  <div class="flag flag-stark">
+    <div>🐺</div>
+    <div class="flag-text">Stark</div>
+  </div>
+
+  <!-- Flying Dragons -->
+  <div class="dragon dragon1">🐉<span class="fire">🔥</span></div>
+  <div class="dragon dragon2">🐉<span class="fire">🔥</span></div>
+  <div class="dragon dragon3">🐉<span class="fire">🔥</span></div>
+
   <div class="calculator">
     <h1>⚔ Calculator ⚔</h1>
     <div class="subtitle">Of Thrones</div>
