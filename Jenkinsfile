@@ -86,7 +86,7 @@ pipeline {
             ssh -o StrictHostKeyChecking=no ${APP_SSH} "sudo mkdir -p ${APP_DIR} && sudo chown -R app:app ${APP_DIR}"
 
             # Sync source code (delete removed files)
-            rsync -az --delete -e "$RSYNC_RSH" ./ ${APP_SSH}:${APP_DIR}/
+            rsync -az --exclude 'venv/' --delete -e "$RSYNC_RSH" ./ ${APP_SSH}:${APP_DIR}/
 
             # Setup Python env and restart service
             ssh -o StrictHostKeyChecking=no ${APP_SSH} "bash -lc '
