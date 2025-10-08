@@ -82,13 +82,13 @@ pipeline {
             echo "Deploying to EC2 instance ${APP_HOST}..."
             RSYNC_RSH="ssh -o StrictHostKeyChecking=no"
 
-            # Ensure target directory exists and owned by app user
+            # Ensure target directory exists and is owned by app user
             ssh -o StrictHostKeyChecking=no ${APP_SSH} "sudo mkdir -p ${APP_DIR} && sudo chown -R app:app ${APP_DIR}"
 
-            # Sync source code (delete removed files)
-            rsync -az --exclude 'venv/' --delete -e "$RSYNC_RSH" ./ ${APP_SSH}:${APP_DIR}/
+            # Sync source code safely (preserve venv folder)
+            rsync -az --delete --exclude 'venv/' -e "$RSYNC_RSH" ./ ${APP_SSH}:${APP_DIR}/
 
-            # Setup Python env and restart service
+            # Create or update Python environment, install gunicorn, and restart service
             ssh -o StrictHostKeyChecking=no ${APP_SSH} "bash -lc '
               set -e
               cd ${APP_DIR}
@@ -96,6 +96,7 @@ pipeline {
               . ${VENV_DIR}/bin/activate
               pip install --upgrade pip
               pip install -r requirements.txt
+              pip install gunicorn
               sudo systemctl daemon-reload
               sudo systemctl restart calculator
               systemctl --no-pager -l status calculator || true
