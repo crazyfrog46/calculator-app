@@ -1,35 +1,373 @@
 <!doctype html>
-<html>
+<html lang="en">
 <head>
   <meta charset="utf-8">
-  <title>Flask Calculator</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Modern Calculator</title>
   <style>
-    body { font-family: system-ui, Arial, sans-serif; margin: 2rem; }
-    form { display: grid; gap: .75rem; max-width: 320px; }
-    input, select, button { padding: .5rem; font-size: 1rem; }
-    .result { margin-top: 1rem; font-weight: 600; }
-    .error { margin-top: 1rem; color: #b00; }
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 1rem;
+    }
+
+    .calculator {
+      background: rgba(255, 255, 255, 0.95);
+      backdrop-filter: blur(10px);
+      border-radius: 24px;
+      box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+      padding: 2rem;
+      width: 100%;
+      max-width: 400px;
+      animation: slideIn 0.4s ease-out;
+    }
+
+    @keyframes slideIn {
+      from {
+        opacity: 0;
+        transform: translateY(-20px);
+      }
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+
+    h1 {
+      color: #2d3748;
+      font-size: 1.75rem;
+      margin-bottom: 1.5rem;
+      text-align: center;
+      font-weight: 700;
+    }
+
+    .display {
+      background: #f7fafc;
+      border: 2px solid #e2e8f0;
+      border-radius: 12px;
+      padding: 1.25rem;
+      margin-bottom: 1.5rem;
+      min-height: 80px;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      transition: all 0.3s ease;
+    }
+
+    .display:focus-within {
+      border-color: #667eea;
+      box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+    }
+
+    .expression {
+      color: #718096;
+      font-size: 0.9rem;
+      margin-bottom: 0.5rem;
+      min-height: 1.2rem;
+    }
+
+    .result {
+      color: #2d3748;
+      font-size: 2rem;
+      font-weight: 600;
+      word-break: break-all;
+    }
+
+    .input-group {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 0.75rem;
+      margin-bottom: 1rem;
+    }
+
+    input {
+      padding: 0.875rem;
+      font-size: 1.125rem;
+      border: 2px solid #e2e8f0;
+      border-radius: 10px;
+      outline: none;
+      transition: all 0.3s ease;
+      font-family: inherit;
+    }
+
+    input:focus {
+      border-color: #667eea;
+      box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+    }
+
+    .operations {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 0.75rem;
+      margin-bottom: 1rem;
+    }
+
+    button {
+      padding: 1rem;
+      font-size: 1.25rem;
+      font-weight: 600;
+      border: none;
+      border-radius: 10px;
+      cursor: pointer;
+      transition: all 0.2s ease;
+      font-family: inherit;
+      color: white;
+    }
+
+    .op-btn {
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    }
+
+    .op-btn:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 6px 20px rgba(102, 126, 234, 0.4);
+    }
+
+    .op-btn:active {
+      transform: translateY(0);
+    }
+
+    .op-btn.active {
+      background: linear-gradient(135deg, #764ba2 0%, #667eea 100%);
+      box-shadow: 0 4px 15px rgba(102, 126, 234, 0.5);
+    }
+
+    .action-buttons {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 0.75rem;
+    }
+
+    .equals-btn {
+      background: linear-gradient(135deg, #48bb78 0%, #38a169 100%);
+    }
+
+    .equals-btn:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 6px 20px rgba(72, 187, 120, 0.4);
+    }
+
+    .clear-btn {
+      background: linear-gradient(135deg, #fc8181 0%, #f56565 100%);
+    }
+
+    .clear-btn:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 6px 20px rgba(252, 129, 129, 0.4);
+    }
+
+    .history {
+      margin-top: 1.5rem;
+      padding-top: 1.5rem;
+      border-top: 2px solid #e2e8f0;
+    }
+
+    .history-title {
+      color: #4a5568;
+      font-size: 0.9rem;
+      font-weight: 600;
+      margin-bottom: 0.75rem;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+    }
+
+    .history-list {
+      max-height: 150px;
+      overflow-y: auto;
+    }
+
+    .history-item {
+      background: #f7fafc;
+      padding: 0.625rem;
+      border-radius: 8px;
+      margin-bottom: 0.5rem;
+      font-size: 0.9rem;
+      color: #4a5568;
+      transition: all 0.2s ease;
+      cursor: pointer;
+    }
+
+    .history-item:hover {
+      background: #edf2f7;
+      transform: translateX(4px);
+    }
+
+    .error-message {
+      color: #e53e3e;
+      font-size: 0.9rem;
+      margin-top: 0.5rem;
+      text-align: center;
+    }
+
+    @media (max-width: 480px) {
+      .calculator {
+        padding: 1.5rem;
+      }
+
+      h1 {
+        font-size: 1.5rem;
+      }
+
+      .result {
+        font-size: 1.75rem;
+      }
+    }
   </style>
 </head>
 <body>
-  <h1>EC2 Flask Calculator</h1>
-  <form method="POST">
-    <input name="a" placeholder="Number A" value="{{ a }}">
-    <input name="b" placeholder="Number B" value="{{ b }}">
-    <select name="op">
-      <option value="add" {% if op=='add' %}selected{% endif %}>Add</option>
-      <option value="sub" {% if op=='sub' %}selected{% endif %}>Subtract</option>
-      <option value="mul" {% if op=='mul' %}selected{% endif %}>Multiply</option>
-      <option value="div" {% if op=='div' %}selected{% endif %}>Divide</option>
-    </select>
-    <button type="submit">Calculate</button>
-  </form>
+  <div class="calculator">
+    <h1>✨ Modern Calculator</h1>
+    
+    <div class="display">
+      <div class="expression" id="expression"></div>
+      <div class="result" id="result">0</div>
+    </div>
 
-  {% if result is not none %}
-  <div class="result">Result: {{ result }}</div>
-  {% endif %}
-  {% if error %}
-  <div class="error">Error: {{ error }}</div>
-  {% endif %}
+    <div class="input-group">
+      <input type="number" id="numA" placeholder="Number A" step="any">
+      <input type="number" id="numB" placeholder="Number B" step="any">
+    </div>
+
+    <div class="operations">
+      <button class="op-btn" data-op="add">+</button>
+      <button class="op-btn" data-op="sub">−</button>
+      <button class="op-btn" data-op="mul">×</button>
+      <button class="op-btn" data-op="div">÷</button>
+    </div>
+
+    <div class="action-buttons">
+      <button class="equals-btn" id="calculate">Calculate</button>
+      <button class="clear-btn" id="clear">Clear</button>
+    </div>
+
+    <div class="error-message" id="error"></div>
+
+    <div class="history">
+      <div class="history-title">Recent Calculations</div>
+      <div class="history-list" id="history"></div>
+    </div>
+  </div>
+
+  <script>
+    let currentOp = 'add';
+    let history = [];
+
+    const opSymbols = {
+      add: '+',
+      sub: '−',
+      mul: '×',
+      div: '÷'
+    };
+
+    const numAInput = document.getElementById('numA');
+    const numBInput = document.getElementById('numB');
+    const expressionEl = document.getElementById('expression');
+    const resultEl = document.getElementById('result');
+    const errorEl = document.getElementById('error');
+    const historyEl = document.getElementById('history');
+    const opButtons = document.querySelectorAll('.op-btn');
+    const calculateBtn = document.getElementById('calculate');
+    const clearBtn = document.getElementById('clear');
+
+    opButtons.forEach(btn => {
+      btn.addEventListener('click', () => {
+        opButtons.forEach(b => b.classList.remove('active'));
+        btn.classList.add('active');
+        currentOp = btn.dataset.op;
+        updateExpression();
+      });
+    });
+
+    opButtons[0].classList.add('active');
+
+    function updateExpression() {
+      const a = numAInput.value || '0';
+      const b = numBInput.value || '0';
+      expressionEl.textContent = `${a} ${opSymbols[currentOp]} ${b}`;
+    }
+
+    numAInput.addEventListener('input', updateExpression);
+    numBInput.addEventListener('input', updateExpression);
+
+    function calculate() {
+      errorEl.textContent = '';
+      const a = parseFloat(numAInput.value);
+      const b = parseFloat(numBInput.value);
+
+      if (isNaN(a) || isNaN(b)) {
+        errorEl.textContent = 'Please enter valid numbers';
+        return;
+      }
+
+      let result;
+      switch(currentOp) {
+        case 'add':
+          result = a + b;
+          break;
+        case 'sub':
+          result = a - b;
+          break;
+        case 'mul':
+          result = a * b;
+          break;
+        case 'div':
+          if (b === 0) {
+            errorEl.textContent = 'Cannot divide by zero';
+            return;
+          }
+          result = a / b;
+          break;
+      }
+
+      result = Math.round(result * 100000000) / 100000000;
+      resultEl.textContent = result;
+
+      const calculation = `${a} ${opSymbols[currentOp]} ${b} = ${result}`;
+      addToHistory(calculation);
+    }
+
+    function addToHistory(calc) {
+      history.unshift(calc);
+      if (history.length > 5) history.pop();
+      
+      historyEl.innerHTML = history.map(item => 
+        `<div class="history-item">${item}</div>`
+      ).join('');
+    }
+
+    function clear() {
+      numAInput.value = '';
+      numBInput.value = '';
+      resultEl.textContent = '0';
+      expressionEl.textContent = '';
+      errorEl.textContent = '';
+      opButtons.forEach(b => b.classList.remove('active'));
+      opButtons[0].classList.add('active');
+      currentOp = 'add';
+    }
+
+    calculateBtn.addEventListener('click', calculate);
+    clearBtn.addEventListener('click', clear);
+
+    numAInput.addEventListener('keypress', (e) => {
+      if (e.key === 'Enter') calculate();
+    });
+
+    numBInput.addEventListener('keypress', (e) => {
+      if (e.key === 'Enter') calculate();
+    });
+
+    updateExpression();
+  </script>
 </body>
 </html>
