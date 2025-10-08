@@ -2,7 +2,7 @@ pipeline {
   agent any
 
   environment {
-    APP_HOST     = 'ec2-18-204-56-101.compute-1.amazonaws.com'
+    APP_HOST     = 'ec2-18.168.11.31.compute-1.amazonaws.com'
     APP_SSH      = "app@${APP_HOST}"
     APP_DIR      = "/opt/calculator-app"
     VENV_DIR     = "${APP_DIR}/venv"
