@@ -4,7 +4,7 @@ pipeline {
   options {
     timeout(time: 20, unit: 'MINUTES')     // Stop builds that hang
     disableConcurrentBuilds()              // Prevent overlapping runs
-    ansiColor('xterm')                     // Colored output
+    timestamps()                           // Add timestamps to logs
   }
 
   environment {
@@ -23,85 +23,95 @@ pipeline {
 
     stage('Checkout') {
       steps {
-        checkout scm
-        sh '''
-          set -e
-          echo "Git version:"
-          git --version
-        '''
+        ansiColor('xterm') {
+          checkout scm
+          sh '''
+            set -e
+            echo "Git version:"
+            git --version
+          '''
+        }
       }
     }
 
     stage('Setup Python') {
       steps {
-        sh '''
-          set -e
-          echo "Setting up Python virtual environment..."
-          python3 --version
-          python3 -m venv .venv
-          . .venv/bin/activate
-          pip install --upgrade pip
-          deactivate || true
-        '''
+        ansiColor('xterm') {
+          sh '''
+            set -e
+            echo "Setting up Python virtual environment..."
+            python3 --version
+            python3 -m venv .venv
+            . .venv/bin/activate
+            pip install --upgrade pip
+            deactivate || true
+          '''
+        }
       }
     }
 
     stage('Install deps & Lint/Test') {
       steps {
-        sh '''
-          set -e
-          echo "Installing dependencies and running lint/tests..."
-          . .venv/bin/activate
-          pip install -r requirements.txt
-          pip install flake8 pytest
-          echo "Running flake8..."
-          flake8 . || echo "Lint warnings detected, continuing..."
-          echo "Running pytest..."
-          pytest --maxfail=1 --disable-warnings -q || echo "Tests failed but continuing."
-          deactivate || true
-        '''
+        ansiColor('xterm') {
+          sh '''
+            set -e
+            echo "Installing dependencies and running lint/tests..."
+            . .venv/bin/activate
+            pip install -r requirements.txt
+            pip install flake8 pytest
+            echo "Running flake8..."
+            flake8 . || echo "Lint warnings detected, continuing..."
+            echo "Running pytest..."
+            pytest --maxfail=1 --disable-warnings -q || echo "Tests failed but continuing."
+            deactivate || true
+          '''
+        }
       }
     }
 
     stage('Package') {
       steps {
-        sh '''
-          set -e
-          echo "Packaging application..."
-          tar czf build.tgz --exclude .venv --exclude __pycache__ --exclude .git *
-        '''
+        ansiColor('xterm') {
+          sh '''
+            set -e
+            echo "Packaging application..."
+            tar czf build.tgz --exclude .venv --exclude __pycache__ --exclude .git *
+          '''
+        }
         archiveArtifacts artifacts: 'build.tgz', fingerprint: true
       }
     }
 
     stage('Deploy to EC2') {
       steps {
-        sshagent(credentials: [env.SSH_CRED]) {
-          sh '''
-            set -e
-            echo "Deploying to EC2 instance ${APP_HOST}..."
-            RSYNC_RSH="ssh -o StrictHostKeyChecking=no"
-
-            # Ensure target directory exists and owned by app user
-            ssh -o StrictHostKeyChecking=no ${APP_SSH} "sudo mkdir -p ${APP_DIR} && sudo chown -R app:app ${APP_DIR}"
-
-            # Sync source code (delete removed files)
-            rsync -az --delete -e "$RSYNC_RSH" ./ ${APP_SSH}:${APP_DIR}/
-
-            # Setup Python env and restart service
-            ssh -o StrictHostKeyChecking=no ${APP_SSH} "bash -lc '
+        ansiColor('xterm') {
+          sshagent(credentials: [env.SSH_CRED]) {
+            sh '''
               set -e
-              cd ${APP_DIR}
-              [ -d ${VENV_DIR} ] || python3 -m venv ${VENV_DIR}
-              . ${VENV_DIR}/bin/activate
-              pip install --upgrade pip
-              pip install -r requirements.txt
-              sudo systemctl daemon-reload
-              sudo systemctl restart calculator
-              systemctl --no-pager -l status calculator || true
-              deactivate || true
-            '"
-          '''
+              echo "Deploying to EC2 instance ${APP_HOST}..."
+              RSYNC_RSH="ssh -o StrictHostKeyChecking=no"
+
+              # Ensure target directory exists and owned by app user
+              ssh -o StrictHostKeyChecking=no ${APP_SSH} "sudo mkdir -p ${APP_DIR} && sudo chown -R app:app ${APP_DIR}"
+
+              # Sync source code (delete removed files)
+              rsync -az --delete -e "$RSYNC_RSH" ./ ${APP_SSH}:${APP_DIR}/
+
+              # Setup Python env and restart service
+              ssh -o StrictHostKeyChecking=no ${APP_SSH} "bash -lc '
+                set -e
+                cd ${APP_DIR}
+                [ -d ${VENV_DIR} ] || python3 -m venv ${VENV_DIR}
+                . ${VENV_DIR}/bin/activate
+                pip install --upgrade pip
+                pip install -r requirements.txt
+                sudo systemctl daemon-reload
+                sudo systemctl restart calculator
+                systemctl --no-pager -l status calculator || true
+                deactivate || true
+              '"
+            '''
+          }
         }
       }
     }
