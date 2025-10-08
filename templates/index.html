@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Modern Calculator</title>
+  <title>Calculator of Thrones</title>
   <style>
     * {
       margin: 0;
@@ -12,48 +12,92 @@
     }
 
     body {
-      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
-      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      font-family: 'Cinzel', 'Times New Roman', serif;
+      background: linear-gradient(135deg, #1a1a2e 0%, #16213e 50%, #0f3460 100%);
       min-height: 100vh;
       display: flex;
       align-items: center;
       justify-content: center;
       padding: 1rem;
+      position: relative;
+      overflow: hidden;
+    }
+
+    body::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background-image: 
+        radial-gradient(circle at 20% 50%, rgba(139, 69, 19, 0.1) 0%, transparent 50%),
+        radial-gradient(circle at 80% 80%, rgba(139, 69, 19, 0.1) 0%, transparent 50%);
+      pointer-events: none;
     }
 
     .calculator {
-      background: rgba(255, 255, 255, 0.95);
-      backdrop-filter: blur(10px);
-      border-radius: 24px;
-      box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+      background: linear-gradient(145deg, #2c2c3e 0%, #1e1e2f 100%);
+      border: 3px solid #8b7355;
+      border-radius: 16px;
+      box-shadow: 
+        0 20px 60px rgba(0, 0, 0, 0.7),
+        inset 0 1px 0 rgba(139, 115, 85, 0.3),
+        0 0 30px rgba(139, 115, 85, 0.2);
       padding: 2rem;
       width: 100%;
-      max-width: 400px;
-      animation: slideIn 0.4s ease-out;
+      max-width: 420px;
+      animation: forgeIn 0.6s ease-out;
+      position: relative;
     }
 
-    @keyframes slideIn {
+    .calculator::before {
+      content: '⚔';
+      position: absolute;
+      top: -15px;
+      left: 50%;
+      transform: translateX(-50%);
+      font-size: 2rem;
+      background: linear-gradient(145deg, #2c2c3e 0%, #1e1e2f 100%);
+      padding: 0 1rem;
+      color: #d4af37;
+    }
+
+    @keyframes forgeIn {
       from {
         opacity: 0;
-        transform: translateY(-20px);
+        transform: translateY(-30px) scale(0.95);
       }
       to {
         opacity: 1;
-        transform: translateY(0);
+        transform: translateY(0) scale(1);
       }
     }
 
     h1 {
-      color: #2d3748;
+      color: #d4af37;
       font-size: 1.75rem;
       margin-bottom: 1.5rem;
       text-align: center;
       font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 3px;
+      text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.7);
+    }
+
+    .subtitle {
+      text-align: center;
+      color: #8b7355;
+      font-size: 0.75rem;
+      margin-top: -1rem;
+      margin-bottom: 1.5rem;
+      letter-spacing: 2px;
+      text-transform: uppercase;
     }
 
     .display {
-      background: #f7fafc;
-      border: 2px solid #e2e8f0;
+      background: linear-gradient(145deg, #1a1a2e 0%, #0f0f1a 100%);
+      border: 2px solid #8b7355;
       border-radius: 12px;
       padding: 1.25rem;
       margin-bottom: 1.5rem;
@@ -61,26 +105,23 @@
       display: flex;
       flex-direction: column;
       justify-content: center;
-      transition: all 0.3s ease;
-    }
-
-    .display:focus-within {
-      border-color: #667eea;
-      box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+      box-shadow: inset 0 2px 8px rgba(0, 0, 0, 0.5);
     }
 
     .expression {
-      color: #718096;
+      color: #8b7355;
       font-size: 0.9rem;
       margin-bottom: 0.5rem;
       min-height: 1.2rem;
+      font-family: 'Courier New', monospace;
     }
 
     .result {
-      color: #2d3748;
+      color: #d4af37;
       font-size: 2rem;
       font-weight: 600;
       word-break: break-all;
+      text-shadow: 0 0 10px rgba(212, 175, 55, 0.3);
     }
 
     .input-group {
@@ -93,16 +134,26 @@
     input {
       padding: 0.875rem;
       font-size: 1.125rem;
-      border: 2px solid #e2e8f0;
-      border-radius: 10px;
+      border: 2px solid #8b7355;
+      border-radius: 8px;
       outline: none;
       transition: all 0.3s ease;
-      font-family: inherit;
+      font-family: 'Courier New', monospace;
+      background: linear-gradient(145deg, #1a1a2e 0%, #0f0f1a 100%);
+      color: #d4af37;
+      box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.5);
+      width: 100%;
+    }
+
+    input::placeholder {
+      color: #6b5d4f;
     }
 
     input:focus {
-      border-color: #667eea;
-      box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+      border-color: #d4af37;
+      box-shadow: 
+        inset 0 2px 4px rgba(0, 0, 0, 0.5),
+        0 0 15px rgba(212, 175, 55, 0.3);
     }
 
     .operations {
@@ -115,22 +166,22 @@
     button {
       padding: 1rem;
       font-size: 1.25rem;
-      font-weight: 600;
-      border: none;
-      border-radius: 10px;
+      font-weight: 700;
+      border: 2px solid #8b7355;
+      border-radius: 8px;
       cursor: pointer;
       transition: all 0.2s ease;
       font-family: inherit;
-      color: white;
-    }
-
-    .op-btn {
-      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      color: #d4af37;
+      background: linear-gradient(145deg, #2c2c3e 0%, #1e1e2f 100%);
+      box-shadow: 0 4px 8px rgba(0, 0, 0, 0.5);
+      text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.7);
     }
 
     .op-btn:hover {
       transform: translateY(-2px);
-      box-shadow: 0 6px 20px rgba(102, 126, 234, 0.4);
+      box-shadow: 0 6px 12px rgba(212, 175, 55, 0.3);
+      border-color: #d4af37;
     }
 
     .op-btn:active {
@@ -138,8 +189,11 @@
     }
 
     .op-btn.active {
-      background: linear-gradient(135deg, #764ba2 0%, #667eea 100%);
-      box-shadow: 0 4px 15px rgba(102, 126, 234, 0.5);
+      background: linear-gradient(145deg, #8b7355 0%, #6b5d4f 100%);
+      border-color: #d4af37;
+      box-shadow: 
+        0 4px 12px rgba(212, 175, 55, 0.4),
+        inset 0 2px 4px rgba(0, 0, 0, 0.3);
     }
 
     .action-buttons {
@@ -149,36 +203,43 @@
     }
 
     .equals-btn {
-      background: linear-gradient(135deg, #48bb78 0%, #38a169 100%);
+      background: linear-gradient(145deg, #2d5016 0%, #1e3610 100%);
+      border-color: #4a7c29;
+      color: #a8d08d;
     }
 
     .equals-btn:hover {
       transform: translateY(-2px);
-      box-shadow: 0 6px 20px rgba(72, 187, 120, 0.4);
+      box-shadow: 0 6px 12px rgba(74, 124, 41, 0.4);
+      border-color: #a8d08d;
     }
 
     .clear-btn {
-      background: linear-gradient(135deg, #fc8181 0%, #f56565 100%);
+      background: linear-gradient(145deg, #5c1a1a 0%, #3d1010 100%);
+      border-color: #8b3a3a;
+      color: #e8b4b4;
     }
 
     .clear-btn:hover {
       transform: translateY(-2px);
-      box-shadow: 0 6px 20px rgba(252, 129, 129, 0.4);
+      box-shadow: 0 6px 12px rgba(139, 58, 58, 0.4);
+      border-color: #e8b4b4;
     }
 
     .history {
       margin-top: 1.5rem;
       padding-top: 1.5rem;
-      border-top: 2px solid #e2e8f0;
+      border-top: 2px solid #8b7355;
     }
 
     .history-title {
-      color: #4a5568;
-      font-size: 0.9rem;
+      color: #d4af37;
+      font-size: 0.85rem;
       font-weight: 600;
       margin-bottom: 0.75rem;
       text-transform: uppercase;
-      letter-spacing: 0.05em;
+      letter-spacing: 2px;
+      text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.7);
     }
 
     .history-list {
@@ -186,27 +247,46 @@
       overflow-y: auto;
     }
 
+    .history-list::-webkit-scrollbar {
+      width: 8px;
+    }
+
+    .history-list::-webkit-scrollbar-track {
+      background: #1a1a2e;
+      border-radius: 4px;
+    }
+
+    .history-list::-webkit-scrollbar-thumb {
+      background: #8b7355;
+      border-radius: 4px;
+    }
+
     .history-item {
-      background: #f7fafc;
+      background: linear-gradient(145deg, #1a1a2e 0%, #0f0f1a 100%);
+      border: 1px solid #8b7355;
       padding: 0.625rem;
-      border-radius: 8px;
+      border-radius: 6px;
       margin-bottom: 0.5rem;
       font-size: 0.9rem;
-      color: #4a5568;
+      color: #8b7355;
       transition: all 0.2s ease;
       cursor: pointer;
+      font-family: 'Courier New', monospace;
     }
 
     .history-item:hover {
-      background: #edf2f7;
+      border-color: #d4af37;
+      color: #d4af37;
       transform: translateX(4px);
+      box-shadow: 0 2px 8px rgba(212, 175, 55, 0.2);
     }
 
     .error-message {
-      color: #e53e3e;
+      color: #e8b4b4;
       font-size: 0.9rem;
       margin-top: 0.5rem;
       text-align: center;
+      text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.7);
     }
 
     @media (max-width: 480px) {
@@ -216,6 +296,7 @@
 
       h1 {
         font-size: 1.5rem;
+        letter-spacing: 2px;
       }
 
       .result {
@@ -226,7 +307,8 @@
 </head>
 <body>
   <div class="calculator">
-    <h1>✨ EC2 Flask Calculator 2.0</h1>
+    <h1>⚔ Calculator ⚔</h1>
+    <div class="subtitle">Of Thrones</div>
     
     <div class="display">
       <div class="expression" id="expression"></div>
@@ -253,7 +335,7 @@
     <div class="error-message" id="error"></div>
 
     <div class="history">
-      <div class="history-title">Recent Calculations</div>
+      <div class="history-title">⚜ Recent Calculations ⚜</div>
       <div class="history-list" id="history"></div>
     </div>
   </div>
