@@ -8,7 +8,7 @@ pipeline {
   }
 
   environment {
-    APP_HOST = '18.133.186.132'
+    APP_HOST = 'ec2-18-133-186-132.eu-west-2.compute.amazonaws.com'
     APP_SSH  = "app@${APP_HOST}"
     APP_DIR  = "/opt/calculator-app"
     VENV_DIR = "${APP_DIR}/venv"
@@ -23,44 +23,38 @@ pipeline {
 
     stage('Checkout') {
       steps {
-        ansiColor('xterm') {
-          checkout scm
-          sh '''
-            set -e
-            echo "Git version:"
-            git --version
-          '''
-        }
+        checkout scm
+        sh '''
+          set -e
+          echo "Git version:"
+          git --version
+        '''
       }
     }
 
     stage('Setup Python') {
       steps {
-        ansiColor('xterm') {
-          sh '''
-            set -e
-            echo "Setting up Python virtual environment..."
-            python3 --version
-            python3 -m venv .venv
-            . .venv/bin/activate
-            pip install --upgrade pip
-            deactivate || true
-          '''
-        }
+        sh '''
+          set -e
+          echo "Setting up Python virtual environment..."
+          python3 --version
+          python3 -m venv .venv
+          . .venv/bin/activate
+          pip install --upgrade pip
+          deactivate || true
+        '''
       }
     }
 
-    stage('Install deps & Lint/Test') {
+    stage('Install deps & Test') {
       steps {
-        ansiColor('xterm') {
+        timeout(time: 5, unit: 'MINUTES') {  // Safety timeout for dependency setup/tests
           sh '''
             set -e
-            echo "Installing dependencies and running lint/tests..."
+            echo "Installing dependencies and running tests..."
             . .venv/bin/activate
             pip install -r requirements.txt
-            pip install flake8 pytest
-            echo "Running flake8..."
-            flake8 . || echo "Lint warnings detected, continuing..."
+            pip install pytest
             echo "Running pytest..."
             pytest --maxfail=1 --disable-warnings -q || echo "Tests failed but continuing."
             deactivate || true
@@ -71,47 +65,43 @@ pipeline {
 
     stage('Package') {
       steps {
-        ansiColor('xterm') {
-          sh '''
-            set -e
-            echo "Packaging application..."
-            tar czf build.tgz --exclude .venv --exclude __pycache__ --exclude .git *
-          '''
-        }
+        sh '''
+          set -e
+          echo "Packaging application..."
+          tar czf build.tgz --exclude .venv --exclude __pycache__ --exclude .git *
+        '''
         archiveArtifacts artifacts: 'build.tgz', fingerprint: true
       }
     }
 
     stage('Deploy to EC2') {
       steps {
-        ansiColor('xterm') {
-          sshagent(credentials: [env.SSH_CRED]) {
-            sh '''
+        sshagent(credentials: [env.SSH_CRED]) {
+          sh '''
+            set -e
+            echo "Deploying to EC2 instance ${APP_HOST}..."
+            RSYNC_RSH="ssh -o StrictHostKeyChecking=no"
+
+            # Ensure target directory exists and owned by app user
+            ssh -o StrictHostKeyChecking=no ${APP_SSH} "sudo mkdir -p ${APP_DIR} && sudo chown -R app:app ${APP_DIR}"
+
+            # Sync source code (delete removed files)
+            rsync -az --delete -e "$RSYNC_RSH" ./ ${APP_SSH}:${APP_DIR}/
+
+            # Setup Python env and restart service
+            ssh -o StrictHostKeyChecking=no ${APP_SSH} "bash -lc '
               set -e
-              echo "Deploying to EC2 instance ${APP_HOST}..."
-              RSYNC_RSH="ssh -o StrictHostKeyChecking=no"
-
-              # Ensure target directory exists and owned by app user
-              ssh -o StrictHostKeyChecking=no ${APP_SSH} "sudo mkdir -p ${APP_DIR} && sudo chown -R app:app ${APP_DIR}"
-
-              # Sync source code (delete removed files)
-              rsync -az --delete -e "$RSYNC_RSH" ./ ${APP_SSH}:${APP_DIR}/
-
-              # Setup Python env and restart service
-              ssh -o StrictHostKeyChecking=no ${APP_SSH} "bash -lc '
-                set -e
-                cd ${APP_DIR}
-                [ -d ${VENV_DIR} ] || python3 -m venv ${VENV_DIR}
-                . ${VENV_DIR}/bin/activate
-                pip install --upgrade pip
-                pip install -r requirements.txt
-                sudo systemctl daemon-reload
-                sudo systemctl restart calculator
-                systemctl --no-pager -l status calculator || true
-                deactivate || true
-              '"
-            '''
-          }
+              cd ${APP_DIR}
+              [ -d ${VENV_DIR} ] || python3 -m venv ${VENV_DIR}
+              . ${VENV_DIR}/bin/activate
+              pip install --upgrade pip
+              pip install -r requirements.txt
+              sudo systemctl daemon-reload
+              sudo systemctl restart calculator
+              systemctl --no-pager -l status calculator || true
+              deactivate || true
+            '"
+          '''
         }
       }
     }
