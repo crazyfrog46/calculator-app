@@ -8,7 +8,7 @@ pipeline {
   }
 
   environment {
-    APP_HOST = 'ec2-18.168.11.31.compute-1.amazonaws.com'
+    APP_HOST = '18.133.186.132'
     APP_SSH  = "app@${APP_HOST}"
     APP_DIR  = "/opt/calculator-app"
     VENV_DIR = "${APP_DIR}/venv"
